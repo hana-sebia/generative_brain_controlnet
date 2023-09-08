@@ -33,8 +33,8 @@ def get_datalist(
     for index, row in df.iterrows():
         data_dicts.append(
             {
-                "t1w": f"{row['t1w']}",
-                "flair": f"{row['flair']}",
+                "ULM": f"{row['ULM']}",
+                "fUS": f"{row['fUS']}",
                 "report": "T1-weighted image of a brain.",
             }
         )
@@ -54,57 +54,57 @@ def get_dataloader(
     # Define transformations
     val_transforms = transforms.Compose(
         [
-            transforms.LoadImaged(keys=["t1w"]),
-            transforms.EnsureChannelFirstd(keys=["t1w"]),
-            transforms.Rotate90d(keys=["t1w"], k=-1, spatial_axes=(0, 1)),  # Fix flipped image read
-            transforms.Flipd(keys=["t1w"], spatial_axis=1),  # Fix flipped image read
-            transforms.ScaleIntensityRanged(keys=["t1w"], a_min=0.0, a_max=255.0, b_min=0.0, b_max=1.0, clip=True),
+            transforms.LoadImaged(keys=["ULM"]),
+            transforms.EnsureChannelFirstd(keys=["ULM"]),
+            transforms.Rotate90d(keys=["ULM"], k=-1, spatial_axes=(0, 1)),  # Fix flipped image read
+            transforms.Flipd(keys=["ULM"], spatial_axis=1),  # Fix flipped image read
+            transforms.ScaleIntensityRanged(keys=["ULM"], a_min=0.0, a_max=255.0, b_min=0.0, b_max=1.0, clip=True),
             ApplyTokenizerd(keys=["report"]),
-            transforms.ToTensord(keys=["t1w", "report"]),
+            transforms.ToTensord(keys=["ULM", "report"]),
         ]
     )
     if model_type == "autoencoder":
         train_transforms = transforms.Compose(
             [
-                transforms.LoadImaged(keys=["t1w"]),
-                transforms.EnsureChannelFirstd(keys=["t1w"]),
-                transforms.Rotate90d(keys=["t1w"], k=-1, spatial_axes=(0, 1)),  # Fix flipped image read
-                transforms.Flipd(keys=["t1w"], spatial_axis=1),  # Fix flipped image read
-                transforms.ScaleIntensityRanged(keys=["t1w"], a_min=0.0, a_max=255.0, b_min=0.0, b_max=1.0, clip=True),
-                transforms.RandFlipd(keys=["t1w"], prob=0.5, spatial_axis=0),
+                transforms.LoadImaged(keys=["ULM"]),
+                transforms.EnsureChannelFirstd(keys=["ULM"]),
+                transforms.Rotate90d(keys=["ULM"], k=-1, spatial_axes=(0, 1)),  # Fix flipped image read
+                transforms.Flipd(keys=["ULM"], spatial_axis=1),  # Fix flipped image read
+                transforms.ScaleIntensityRanged(keys=["ULM"], a_min=0.0, a_max=255.0, b_min=0.0, b_max=1.0, clip=True),
+                transforms.RandFlipd(keys=["ULM"], prob=0.5, spatial_axis=0),
                 transforms.RandAffined(
-                    keys=["t1w"],
+                    keys=["ULM"],
                     translate_range=(-2, 2),
                     scale_range=(-0.05, 0.05),
                     spatial_size=[160, 224],
                     prob=0.5,
                 ),
-                transforms.RandShiftIntensityd(keys=["t1w"], offsets=0.05, prob=0.1),
-                transforms.RandAdjustContrastd(keys=["t1w"], gamma=(0.97, 1.03), prob=0.1),
-                transforms.ThresholdIntensityd(keys=["t1w"], threshold=1, above=False, cval=1.0),
-                transforms.ThresholdIntensityd(keys=["t1w"], threshold=0, above=True, cval=0),
+                transforms.RandShiftIntensityd(keys=["ULM"], offsets=0.05, prob=0.1),
+                transforms.RandAdjustContrastd(keys=["ULM"], gamma=(0.97, 1.03), prob=0.1),
+                transforms.ThresholdIntensityd(keys=["ULM"], threshold=1, above=False, cval=1.0),
+                transforms.ThresholdIntensityd(keys=["ULM"], threshold=0, above=True, cval=0),
             ]
         )
     if model_type == "diffusion":
         train_transforms = transforms.Compose(
             [
-                transforms.LoadImaged(keys=["t1w"]),
-                transforms.EnsureChannelFirstd(keys=["t1w"]),
-                transforms.Rotate90d(keys=["t1w"], k=-1, spatial_axes=(0, 1)),  # Fix flipped image read
-                transforms.Flipd(keys=["t1w"], spatial_axis=1),  # Fix flipped image read
-                transforms.ScaleIntensityRanged(keys=["t1w"], a_min=0.0, a_max=255.0, b_min=0.0, b_max=1.0, clip=True),
-                transforms.RandFlipd(keys=["t1w"], prob=0.5, spatial_axis=0),
+                transforms.LoadImaged(keys=["ULM"]),
+                transforms.EnsureChannelFirstd(keys=["ULM"]),
+                transforms.Rotate90d(keys=["ULM"], k=-1, spatial_axes=(0, 1)),  # Fix flipped image read
+                transforms.Flipd(keys=["ULM"], spatial_axis=1),  # Fix flipped image read
+                transforms.ScaleIntensityRanged(keys=["ULM"], a_min=0.0, a_max=255.0, b_min=0.0, b_max=1.0, clip=True),
+                transforms.RandFlipd(keys=["ULM"], prob=0.5, spatial_axis=0),
                 transforms.RandAffined(
-                    keys=["t1w"],
+                    keys=["ULM"],
                     translate_range=(-2, 2),
                     scale_range=(-0.01, 0.01),
                     spatial_size=[160, 224],
                     prob=0.25,
                 ),
-                transforms.RandShiftIntensityd(keys=["t1w"], offsets=0.05, prob=0.1),
-                transforms.RandAdjustContrastd(keys=["t1w"], gamma=(0.97, 1.03), prob=0.1),
-                transforms.ThresholdIntensityd(keys=["t1w"], threshold=1, above=False, cval=1.0),
-                transforms.ThresholdIntensityd(keys=["t1w"], threshold=0, above=True, cval=0),
+                transforms.RandShiftIntensityd(keys=["ULM"], offsets=0.05, prob=0.1),
+                transforms.RandAdjustContrastd(keys=["ULM"], gamma=(0.97, 1.03), prob=0.1),
+                transforms.ThresholdIntensityd(keys=["ULM"], threshold=1, above=False, cval=1.0),
+                transforms.ThresholdIntensityd(keys=["ULM"], threshold=0, above=True, cval=0),
                 ApplyTokenizerd(keys=["report"]),
                 transforms.RandLambdad(
                     keys=["report"],
@@ -118,38 +118,38 @@ def get_dataloader(
     if model_type == "controlnet":
         val_transforms = transforms.Compose(
             [
-                transforms.LoadImaged(keys=["t1w", "flair"]),
-                transforms.EnsureChannelFirstd(keys=["t1w", "flair"]),
-                transforms.Rotate90d(keys=["t1w", "flair"], k=-1, spatial_axes=(0, 1)),  # Fix flipped image read
-                transforms.Flipd(keys=["t1w", "flair"], spatial_axis=1),  # Fix flipped image read
+                transforms.LoadImaged(keys=["ULM", "fUS"]),
+                transforms.EnsureChannelFirstd(keys=["ULM", "fUS"]),
+                transforms.Rotate90d(keys=["ULM", "fUS"], k=-1, spatial_axes=(0, 1)),  # Fix flipped image read
+                transforms.Flipd(keys=["ULM", "fUS"], spatial_axis=1),  # Fix flipped image read
                 transforms.ScaleIntensityRanged(
-                    keys=["t1w", "flair"], a_min=0.0, a_max=255.0, b_min=0.0, b_max=1.0, clip=True
+                    keys=["ULM", "fUS"], a_min=0.0, a_max=255.0, b_min=0.0, b_max=1.0, clip=True
                 ),
                 ApplyTokenizerd(keys=["report"]),
-                transforms.ToTensord(keys=["t1w", "flair", "report"]),
+                transforms.ToTensord(keys=["ULM", "fUS", "report"]),
             ]
         )
         train_transforms = transforms.Compose(
             [
-                transforms.LoadImaged(keys=["t1w", "flair"]),
-                transforms.EnsureChannelFirstd(keys=["t1w", "flair"]),
-                transforms.Rotate90d(keys=["t1w", "flair"], k=-1, spatial_axes=(0, 1)),  # Fix flipped image read
-                transforms.Flipd(keys=["t1w", "flair"], spatial_axis=1),  # Fix flipped image read
+                transforms.LoadImaged(keys=["ULM", "fUS"]),
+                transforms.EnsureChannelFirstd(keys=["ULM", "fUS"]),
+                transforms.Rotate90d(keys=["ULM", "fUS"], k=-1, spatial_axes=(0, 1)),  # Fix flipped image read
+                transforms.Flipd(keys=["ULM", "fUS"], spatial_axis=1),  # Fix flipped image read
                 transforms.ScaleIntensityRanged(
-                    keys=["t1w", "flair"], a_min=0.0, a_max=255.0, b_min=0.0, b_max=1.0, clip=True
+                    keys=["ULM", "fUS"], a_min=0.0, a_max=255.0, b_min=0.0, b_max=1.0, clip=True
                 ),
-                transforms.RandFlipd(keys=["t1w", "flair"], prob=0.5, spatial_axis=0),
+                transforms.RandFlipd(keys=["ULM", "fUS"], prob=0.5, spatial_axis=0),
                 transforms.RandAffined(
-                    keys=["t1w", "flair"],
+                    keys=["ULM", "fUS"],
                     translate_range=(-2, 2),
                     scale_range=(-0.01, 0.01),
                     spatial_size=[160, 224],
                     prob=0.25,
                 ),
-                transforms.RandShiftIntensityd(keys=["t1w", "flair"], offsets=0.05, prob=0.1),
-                transforms.RandAdjustContrastd(keys=["t1w", "flair"], gamma=(0.97, 1.03), prob=0.1),
-                transforms.ThresholdIntensityd(keys=["t1w", "flair"], threshold=1, above=False, cval=1.0),
-                transforms.ThresholdIntensityd(keys=["t1w", "flair"], threshold=0, above=True, cval=0),
+                transforms.RandShiftIntensityd(keys=["ULM", "fUS"], offsets=0.05, prob=0.1),
+                transforms.RandAdjustContrastd(keys=["ULM", "fUS"], gamma=(0.97, 1.03), prob=0.1),
+                transforms.ThresholdIntensityd(keys=["ULM", "fUS"], threshold=1, above=False, cval=1.0),
+                transforms.ThresholdIntensityd(keys=["ULM", "fUS"], threshold=0, above=True, cval=0),
                 ApplyTokenizerd(keys=["report"]),
                 transforms.RandLambdad(
                     keys=["report"],
